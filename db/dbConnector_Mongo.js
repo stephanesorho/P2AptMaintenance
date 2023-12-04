@@ -118,7 +118,7 @@ async function getRequests() {
 
   try {
     const res = await users
-      .find({}, { title: 1, request_id: 1, user_id: 1 })
+      .find({}, { "request.title": 1, "request.request_id": 1, user_id: 1 })
       .sort({ "request.request_id": 1 })
       .limit(20)
       .toArray();
