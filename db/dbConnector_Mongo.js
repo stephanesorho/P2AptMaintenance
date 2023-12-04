@@ -93,11 +93,11 @@ async function createUser(newUser) {
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
 
-  const newId = await users.countDocuments({});
+  const lastId = await users.countDocuments({});
 
   try {
     const res = await users.insertOne({
-      user_id: newId + 1,
+      user_id: lastId + 1,
       name: newUser.name,
       apt_number: newUser.apt_number,
       email: newUser.email,
@@ -118,7 +118,7 @@ async function getRequests() {
 
   try {
     const res = await users
-      .find({}, { "request.title": 1, "request.request_id": 1, user_id: 1 })
+      .find({}, { title: 1, request_id: 1, user_id: 1 })
       .sort({ "request.request_id": 1 })
       .limit(20)
       .toArray();
@@ -131,102 +131,87 @@ async function getRequests() {
 }
 
 async function getRequestById(request_id) {
-  const db = await connect();
+  const client = new MongoClient(url);
+
+  const myDB = client.db(DB_NAME);
+  const users = myDB.collection(COLLECTION_NAME);
 
   try {
-    const stmt = await db.prepare(`SELECT title, request_id, user_id
-    FROM Request
-    WHERE
-      request_id = :request_id
-  `);
+    const res = await users
+      .find(
+        { "request.request_id": parseInt(request_id) },
+        { "request.title": 1, "request.request_id": 1, user_id: 1 }
+      )
+      .limit(1)
+      .toArray();
 
-    stmt.bind({
-      ":request_id": request_id,
-    });
+    console.log(res);
 
-    const request = await stmt.all();
-
-    await stmt.finalize();
-
-    return request;
+    return res;
   } finally {
-    await db.close();
+    await client.close();
   }
 }
 
 async function updateRequest(request_id, newRequest) {
-  console.log("update request request_id ", request_id);
-  const db = await connect();
+  const client = new MongoClient(url);
+
+  const myDB = client.db(DB_NAME);
+  const users = myDB.collection(COLLECTION_NAME);
 
   try {
-    const stmt = await db.prepare(`UPDATE Request
-    SET
-      title = :title
-    WHERE
-      request_id = :request_id
-  `);
+    const res = await users.updateOne(
+      { "request.request_id": parseInt(request_id) },
+      {
+        $set: {
+          "request.title": newRequest.title,
+          "request.request_id": newRequest.request_id,
+        },
+      }
+    );
 
-    stmt.bind({
-      ":title": newRequest.title,
-      ":request_id": request_id,
-    });
-
-    const result = await stmt.run();
-
-    await stmt.finalize();
-
-    return result;
+    return res;
   } finally {
-    await db.close();
+    await client.close();
   }
 }
 
 async function deleteRequest(request_id) {
-  console.log("deleting request ", request_id);
-  const db = await connect();
+  const client = new MongoClient(url);
+
+  const myDB = client.db(DB_NAME);
+  const users = myDB.collection(COLLECTION_NAME);
 
   try {
-    const stmt = await db.prepare(`DELETE FROM Request
-    WHERE
-      request_id = :request_id
-  `);
-
-    stmt.bind({
-      ":request_id": request_id,
+    const res = await users.deleteOne({
+      "request.request_id": parseInt(request_id),
     });
 
-    const result = await stmt.run();
-
-    await stmt.finalize();
-
-    return result;
+    return res;
   } finally {
-    await db.close();
+    await client.close();
   }
 }
 
 async function createRequest(newRequest) {
-  const db = await connect();
+  const client = new MongoClient(url);
+
+  const myDB = client.db(DB_NAME);
+  const users = myDB.collection(COLLECTION_NAME);
+
+  const lastId = await users.countDocuments({});
 
   try {
-    const stmt = await db.prepare(`INSERT INTO
-    Request(title, request_id, user_id)
-    VALUES (:title, :request_id, :user_id)
-  `);
-
-    stmt.bind({
-      ":title": newRequest.title,
-      ":request_id": newRequest.request_id,
-      ":user_id": newRequest.user_id,
+    const res = await users.insertOne({
+      user_id: lastId + 1,
+      "request.title": newRequest.title,
+      "request.request_id": newRequest.request_id,
+      user_id: newRequest.user_id,
     });
 
-    const result = await stmt.run();
-
-    await stmt.finalize();
-
-    return result;
+    return res;
   } finally {
-    await db.close();
+    await client.close();
   }
 }
 

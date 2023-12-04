@@ -171,7 +171,7 @@ router.get("/requests", async function (req, res) {
 
   const requests = await getRequests();
 
-  console.log("got requests", requests);
+  //console.log("got requests", requests);
 
   res.render("requests", { requests, err: null, type: "success" });
 });
