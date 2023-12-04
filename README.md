@@ -1,8 +1,37 @@
 # Apartment Maintenance System Project
 
-## Database (MongoDB)
+## Apartment Maintenance Node Express SqLite EJS
 
-aptMaintenance.json
+A simple full stack server side rendered app
+
+## FrontEnd
+
+/views/index.ejs
+
+HTML + EJS + ES6 + Bootstrap
+
+## BackEnd
+
+Node + Express
+
+### Routing
+
+/routes/index.js
+
+### DB Connector
+
+/db/dbConnector_Mongo
+
+## Database
+
+MongoDB
+
+## Usage
+
+```
+npm install
+npm start
+```
 
 # Instructions to run the queries on DB
 

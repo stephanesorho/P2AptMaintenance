@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+
+<head>
+    <title>
+        User Edit
+    </title>
+    <%- include('./partials/css.ejs') %>
+</head>
+
+<body>
+    <%- include("./partials/navBar.ejs") %>
+        <h1>
+            Edit user <%= user?.user_id %>
+        </h1>
+        <div class="container">
+
+
+            <%- include("./partials/errMsg.ejs") %>
+                <form action="/users/<%= user?.user_id %>/edit" method="POST">
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Tenant Name
+                            <input type="text" value="<%= user.name %>" name="name" class="form-control">
+                        </label>
+                    </div>
+                    <div class="mb-3">
+
+                        <label class="form-label">
+                            Unit Number
+                            <input type="text" value="<%= user.apt_number %>" name="apt_number" class="form-control">
+                        </label>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">
+                            Email
+                            <input type="text" value="<%= user.email %>" name="email" class="form-control">
+                        </label>
+                    </div>
+                    <div>
+                        <button type="submit" class="btn btn-primary">Edit</button>
+                    </div>
+                </form>
+
+        </div>
+
+
+
+        <%- include("./partials/footer.ejs") %>
+
+</body>
+
+</html>
