@@ -5,7 +5,7 @@
  */
 
 let app = require("../app");
-let debug = require("debug")("nodeexpresssqliteejs-p1aptmaintenance:server");
+let debug = require("debug")("p2aptmaintenance:server");
 let http = require("http");
 
 /**

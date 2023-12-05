@@ -234,7 +234,7 @@ router.get("/requests/:request_id/delete", async function (req, res) {
     console.log("Delete request result=", sqlResDelete);
     const requests = await getRequests();
 
-    if (sqlResDelete.changes === 1) {
+    if (sqlResDelete.deletedCount === 1) {
       res.render("requests", {
         requests,
         err: "Request deleted",
@@ -275,7 +275,7 @@ router.post("/requests/create", async function (req, res) {
     console.log("Creating request", sqlResCreate);
     const requests = await getRequests();
 
-    if (sqlResCreate.changes === 1) {
+    if (sqlResCreate != null) {
       res.render("requests", {
         requests,
         err: "Request Created " + sqlResCreate.lastID,

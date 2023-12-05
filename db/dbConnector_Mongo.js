@@ -117,14 +117,21 @@ async function getRequests() {
   const users = myDB.collection(COLLECTION_NAME);
 
   try {
+    console.log("get request from backend");
     const res = await users
-      .find({}, { "request.title": 1, "request.request_id": 1, user_id: 1 })
-      .sort({ "request.request_id": 1 })
+      .find({})
+      .project({
+        request_title: "$request.title",
+        request_id: "$request.request_id",
+        user_id: 1,
+      })
       .limit(20)
       .toArray();
 
-    console.log("dbConnector got requests", res);
+    //console.log("dbConnector got requests", res);
     return res;
+  } catch (err) {
+    console.log("error", err);
   } finally {
     await client.close();
   }
@@ -199,11 +206,8 @@ async function createRequest(newRequest) {
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
 
-  const lastId = await users.countDocuments({});
-
   try {
     const res = await users.insertOne({
-      user_id: lastId + 1,
       "request.title": newRequest.title,
       "request.request_id": newRequest.request_id,
       user_id: newRequest.user_id,
