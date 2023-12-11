@@ -13,7 +13,7 @@ const {
   updateRequest,
   deleteRequest,
   createRequest,
-} = require("../db/dbConnector_Mongo.js");
+} = require("../db/db_MongoRedis.js");
 
 /* GET home page. */
 router.get("/", async function (req, res) {

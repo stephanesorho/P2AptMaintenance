@@ -1,4 +1,5 @@
 const { MongoClient } = require("mongodb");
+const { createClient } = require("redis");
 
 const url = "mongodb://localhost:27017";
 
@@ -116,6 +117,15 @@ async function getRequests() {
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
 
+  //Connect to redis client
+  let redisClient = await createClient()
+    .on("error", (err) => console.log("Redis Client connection error " + err))
+    .connect();
+  console.log("Connected to Redis Client");
+
+  await redisClient.del("requests");
+  await redisClient.del("userReq");
+
   try {
     console.log("get request from backend");
     const res = await users
@@ -128,12 +138,35 @@ async function getRequests() {
       .limit(20)
       .toArray();
 
+    //add requests to redis
+    for (let i = 0; i < res.length; i++) {
+      const reqId = "request:" + res[i].request_id;
+      const title = res[i].request_title;
+      const userId = res[i].user_id;
+      await redisClient.hSet("request", {
+        [reqId]: title,
+      });
+      //await redisClient.rPush("userReq", "user_id:" + userId + ":" + reqId);
+    }
+
+    // //add requests to redis
+    // for (let i = 0; i < res.length; i++) {
+    //   const reqId = res[i].request_id;
+    //   const title = res[i].request_title;
+    //   await redisClient.zAdd("requests", {
+    //     score: reqId,
+    //     value: title,
+    //   });
+    // }
+
     //console.log("dbConnector got requests", res);
     return res;
   } catch (err) {
     console.log("error", err);
   } finally {
     await client.close();
+    //Disconnect from redis
+    await redisClient.disconnect();
   }
 }
 
@@ -142,6 +175,12 @@ async function getRequestById(request_id) {
 
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
+
+  //Connect to redis client
+  let redisClient = await createClient()
+    .on("error", (err) => console.log("Redis Client connection error " + err))
+    .connect();
+  console.log("Connected to Redis Client");
 
   try {
     const res = await users
@@ -153,6 +192,8 @@ async function getRequestById(request_id) {
       .toArray();
 
     console.log(res);
+
+    const redisId = await redisClient.get("request:" + request_id);
 
     return res;
   } finally {
@@ -177,6 +218,12 @@ async function updateRequest(request_id, newRequest) {
       }
     );
 
+    const key = "request:" + request_id;
+
+    await redisClient.hSet("request", {
+      [key]: newRequest.request_title,
+    });
+
     return res;
   } finally {
     await client.close();
@@ -192,6 +239,10 @@ async function deleteRequest(request_id) {
   try {
     const res = await users.deleteOne({
       "request.request_id": parseInt(request_id),
+    });
+
+    await redisClient.del("request", {
+      [key]: newRequest.request_title,
     });
 
     return res;
@@ -211,6 +262,12 @@ async function createRequest(newRequest) {
       "request.title": newRequest.title,
       "request.request_id": newRequest.request_id,
       user_id: newRequest.user_id,
+    });
+
+    const newKey = "request:" + newRequest.request_id;
+
+    await redisClient.hSet("request", {
+      [newKey]: newRequest.request_title,
     });
 
     return res;
