@@ -194,6 +194,7 @@ async function getRequestById(request_id) {
     console.log(res);
 
     const redisId = await redisClient.get("request:" + request_id);
+    console.log(redisId);
 
     return res;
   } finally {
@@ -206,6 +207,12 @@ async function updateRequest(request_id, newRequest) {
 
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
+
+  //Connect to redis client
+  let redisClient = await createClient()
+    .on("error", (err) => console.log("Redis Client connection error " + err))
+    .connect();
+  console.log("Connected to Redis Client");
 
   try {
     const res = await users.updateOne(
@@ -227,6 +234,8 @@ async function updateRequest(request_id, newRequest) {
     return res;
   } finally {
     await client.close();
+    //Disconnect from redis
+    await redisClient.disconnect();
   }
 }
 
@@ -235,6 +244,12 @@ async function deleteRequest(request_id) {
 
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
+
+  //Connect to redis client
+  let redisClient = await createClient()
+    .on("error", (err) => console.log("Redis Client connection error " + err))
+    .connect();
+  console.log("Connected to Redis Client");
 
   try {
     const res = await users.deleteOne({
@@ -248,6 +263,8 @@ async function deleteRequest(request_id) {
     return res;
   } finally {
     await client.close();
+    //Disconnect from redis
+    await redisClient.disconnect();
   }
 }
 
@@ -256,6 +273,12 @@ async function createRequest(newRequest) {
 
   const myDB = client.db(DB_NAME);
   const users = myDB.collection(COLLECTION_NAME);
+
+  //Connect to redis client
+  let redisClient = await createClient()
+    .on("error", (err) => console.log("Redis Client connection error " + err))
+    .connect();
+  console.log("Connected to Redis Client");
 
   try {
     const res = await users.insertOne({
@@ -273,6 +296,8 @@ async function createRequest(newRequest) {
     return res;
   } finally {
     await client.close();
+    //Disconnect from redis
+    await redisClient.disconnect();
   }
 }
 
