@@ -124,7 +124,6 @@ async function getRequests() {
   console.log("Connected to Redis Client");
 
   await redisClient.del("requests");
-  await redisClient.del("userReq");
 
   try {
     console.log("get request from backend");
@@ -142,24 +141,11 @@ async function getRequests() {
     for (let i = 0; i < res.length; i++) {
       const reqId = "request:" + res[i].request_id;
       const title = res[i].request_title;
-      const userId = res[i].user_id;
       await redisClient.hSet("request", {
         [reqId]: title,
       });
-      //await redisClient.rPush("userReq", "user_id:" + userId + ":" + reqId);
     }
 
-    // //add requests to redis
-    // for (let i = 0; i < res.length; i++) {
-    //   const reqId = res[i].request_id;
-    //   const title = res[i].request_title;
-    //   await redisClient.zAdd("requests", {
-    //     score: reqId,
-    //     value: title,
-    //   });
-    // }
-
-    //console.log("dbConnector got requests", res);
     return res;
   } catch (err) {
     console.log("error", err);
